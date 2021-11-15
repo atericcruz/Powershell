@@ -1,0 +1,59 @@
+Function Get-Trimmed {
+
+  [CmdletBinding()]
+ 
+  param(
+    [ValidateNotNullOrEmpty()]
+    [string]$Trim
+  
+  )
+  
+  Process {
+
+    try {
+  
+      $Output = $Trim.Trim() -replace 'VMware*', 'VMware'
+
+    }
+
+    catch {
+  
+      $Output = $Trim
+
+    }
+
+    Write-Output $Output
+
+  }
+
+}
+
+$win32_computersystem = @(Get-CimInstance win32_computersystem -Property *)
+$Win32_Processor = @(Get-CimInstance Win32_Processor -Property *)
+$win32_operatingsystem = @(Get-CimInstance win32_operatingsystem -Property *)
+$WIN32_PhysicalMemory = @(Get-CimInstance WIN32_PhysicalMemory -Property *)
+$win32_bios = @(Get-CimInstance win32_bios -Property *)
+$Manufacturer = Get-Trimmed ($win32_computersystem.Manufacturer -as [string])
+$Model = Get-Trimmed ($win32_computersystem.Model -as [string])
+$Serial = $win32_operatingsystem.serialnumber
+$Bios_Manufacturer = $win32_bios.Manufacturer
+$Bios_Version = $win32_bios.BIOSVersion -join ';'
+$CPU = $Win32_Processor.Name
+$Sockets = $win32_computersystem.NumberOfProcessors
+$Cores = $Win32_Processor.NumberOfCores
+$Cores_Logical = $win32_computersystem.NumberOfLogicalProcessors
+$MemoryGB = [math]::Round(($WIN32_PhysicalMemory | Measure-Object Capacity -Sum).sum / 1GB)
+$OS = $win32_operatingsystem.caption
+$OS_Install = $win32_operatingsystem.installdate.ToString()
+$OS_Version = $win32_operatingsystem.version
+$OS_Build = $win32_operatingsystem.Buildnumber
+$PowerShell_Version = $PSVersionTable.PSVersion.ToString()
+
+$UpdateSession = New-Object -ComObject Microsoft.Update.Session
+$WsusSearcher = $UpdateSession.CreateUpdateSearcher()
+
+Write-Host "Installed Updates"
+$Searched_Installed = @($WsusSearcher.Search("IsInstalled=1").updates)
+
+Write-Host "Pending Updates"
+$Searched_NotInstalled = @($WsusSearcher.Search("IsInstalled=0").updates)
