@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Systems</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/colreorder/1.5.5/css/colReorder.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/searchbuilder/1.3.0/css/searchBuilder.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/datetime/1.1.1/css/dataTables.dateTime.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/rowgroup/1.1.4/css/rowGroup.bootstrap5.min.css" rel="stylesheet">
+
+    <style>
+        div.col {
+            width: 80%
+        }
+
+
+        #body-row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        #output tbody tr.selected {
+            background-color: #0275d8;
+        }
+    </style>
+    <style>
+        body {
+            font-family: "Lato", sans-serif;
+        }
+
+        .sidenav {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+        }
+
+        .sidenav a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidenav a:hover {
+            color: #f1f1f1;
+        }
+
+        .sidenav .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+
+        #main {
+            transition: margin-left .5s;
+            padding: 16px;
+        }
+
+        @media screen and (max-height: 450px) {
+            .sidenav {
+                padding-top: 15px;
+            }
+
+            .sidenav a {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a id='isitup' href="#" onclick="test(this.id)">Is It Up</a>
+        <a id='ucs' href="#" onclick="test(this.id)">UCS</a>
+        <a id='storage' href="#" onclick="test(this.id)">Storage</a>
+        <a id='adusers' href="#" onclick="test(this.id)">AD Users</a>
+		<a id='esxihosts' href="#" onclick="test(this.id)">ESXi Hosts</a>
+        <!-- <a id='servers' href="#" onclick="test(this.id)">Servers</a> -->
+        <!--  <a href="#" onclick="adUsers()">AD Users</a>
+        <a href="#" onclick="ad90Users()">AD 90days Users</a>
+        <a href="#" onclick="adLockedUsers()">AD Locked</a>
+        <a href="#" onclick="adGroups()">AD Groups</a>
+        <a href="#" onclick="adServers()">AD Servers</a>
+        <a href="#" onclick="vmwareServers()">VMware</a>
+        <a href="#" onclick="serverDisks()">Server Disks</a>
+        <a href="#" onclick="vmDisks()">VM Disks</a> -->
+    </div>
+
+    <div id="main">
+        <h2>Systems</h2>
+
+        <p id="time"></p>
+        <!----<span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span> ----->
+        <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776</span>
+        <div class="container-fluid">
+            <div id="loading" style="display:block;">
+                <h1 class="h1-reponsive mb-3 blue-text"><strong>LOADING...</strong></h1>
+            </div>
+            <div class="jumbotron text-center">
+                <h1 id="mainHeader" class="h1-reponsive mb-3 blue-text"><strong>Welcome</strong></h1>
+            </div>
+
+            <div class="row">
+                <main class="col-sm">
+                    <table id="table" class="table  table-striped table-bordered display" width="100%" cellspacing="0">
+                    </table>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.1.9/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.8/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.8/js/responsive.bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.colVis.min.js"></script>
+    <script src="https://cdn.datatables.net/colreorder/1.5.5/js/dataTables.colReorder.min.js"></script>
+    <script src="https://cdn.datatables.net/searchbuilder/1.3.0/js/dataTables.searchBuilder.min.js"></script>
+    <script src="https://cdn.datatables.net/searchbuilder/1.3.0/js/searchBuilder.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/datetime/1.1.1/js/dataTables.dateTime.min.js"></script>
+    <script src="https://cdn.datatables.net/rowgroup/1.1.4/js/dataTables.rowGroup.min.js"></script>
+
+    <script>
+
+        openNav();
+        test('storage');
+
+
+        function test(id) {
+console.log(id)
+            document.getElementById("mainHeader").innerText = ''
+            $('#loading').css('display', 'block');
+
+            let uriRoot = "http://systems.domain.local/"
+            let json;
+            let innerText;
+            let columnSort;
+            let rowCallback;
+            let paging;
+            let rowGroup;
+            let total;
+            switch (id) {
+
+				case 'esxihosts':
+                    json = uriRoot + id + '.json';
+                    innerText = 'ESXi Hosts';
+                    columnSort = 1;
+                    columnOrder = 'asc';
+                    rowCallback = 'none';
+                    paging = true
+                    rowGroup = ''
+                    break;
+                case 'adusers':
+                    json = uriRoot + id + '.json';
+                    innerText = 'AD Users';
+                    columnSort = 2;
+                    columnOrder = 'asc';
+                    rowCallback = 'none';
+                    paging = true
+                    rowGroup = '2'
+                    break;
+                case 'isitup':
+                    json = uriRoot + id + '.json';
+                    innerText = 'Is It Up Senores?';
+                    columnSort = 2;
+                    columnOrder = 'asc';
+                    rowCallback = '2';
+                    paging = false
+                    rowGroup = 2
+                    break;
+                case 'ucs':
+                    json = uriRoot + id + '.json';
+                    innerText = "UCS Inventory";
+                    columnSort = 2;
+                    columnOrder = 'asc';
+                    paging = false
+                    rowCallback = 'none';
+                    rowGroup = ''
+                    break;
+                case 'servers':
+                    json = uriRoot + id + '.json';
+                    innerText = "Servers Inventory";
+                    columnSort = 2;
+                    columnOrder = 'asc';
+                    rowCallback = 'none';
+                    paging = true
+                    rowGroup = ''
+                    break;
+                case 'storage':
+                    json = uriRoot + id + '.json';
+                    innerText = 'Storage Report';
+                    columnSort = 2;
+                    columnOrder = 'dsc';
+                    rowCallback = 'Used%';
+                    paging = false
+                    rowGroup = ''
+                    break;
+                default:
+                // code block
+            }
+
+            if ($.fn.DataTable.isDataTable("#table")) {
+
+                $('#table').DataTable().clear().destroy();
+                $('#table').empty();
+
+            }
+
+            let items = [];
+            let columns = [];
+			console.log(json)
+            $.getJSON(json, function (data) {
+				console.log(json)
+                $.each(data, function (key, val) {
+
+                    items.push({
+                        title: key,
+                        data: key
+                    });
+
+                });
+
+                Object.keys(data[0]).forEach(key => columns.push({
+
+                    title: key,
+                    data: key
+
+                }));
+                totalcount = items.length
+
+                innerText = innerText + ' Total: ' + totalcount
+                
+                $('#table').DataTable({
+                    responsive: true,
+                    destroy: true,
+                    data: data,
+                    columns: columns,
+                    deferrender: true,
+                    colReorder: true,
+                    dom: 'Blfrtip',
+                    processing: true,
+                    "columnDefs": [{
+                        "targets": 1,
+                        "render": function (data, type, row, meta) {
+
+                            if (id == 'isitup') {
+                                return '<a href="http://systems.domain.local/' + data + '/index.html' + '" target="_blank">' + data + '</a>';
+                            } else {
+
+                                return data
+                            }
+
+                        }
+                    }],
+                    paging: paging,
+                    searching: true,
+                    order: [[columnSort, columnOrder]],
+                    search: {
+                        "smart": true
+                    },
+                    buttons: {
+                        buttons: [{
+                            extend: 'copy',
+                            className: 'copyButton'
+                        },
+                        {
+                            extend: 'csv',
+                            className: 'csv'
+                        },
+
+                        {
+                            extend: 'excel',
+                            className: 'buttons-excel'
+                        },
+                            'colvis',
+                            'searchBuilder'
+
+                        ]
+                    },
+                    colReorder: true,
+                    stateSave: true,
+                    stateSaveCallback: function (settings, data) {
+                        localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+                    },
+                    stateLoadCallback: function (settings) {
+                        return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+                    }
+
+                });
+
+                if (rowCallback !== 'none') {
+
+                    $('#table').dataTable({
+                        responsive: true,
+                        destroy: true,
+                        paging: paging,
+                        searching: true,
+                        order: [[columnSort, columnOrder]],
+                        search: {
+                            "smart": true
+                        },
+                        colReorder: true,
+                        dom: 'Bfrtip',
+                        processing: true,
+                        
+                        buttons: {
+                            buttons: [{
+                                extend: 'copy',
+                                className: 'copyButton'
+                            },
+                            {
+                                extend: 'csv',
+                                className: 'csv'
+                            },
+
+                            {
+                                extend: 'excel',
+                                className: 'buttons-excel'
+                            },
+                                'colvis',
+                                'searchBuilder'
+
+                            ]
+                        },
+                        colReorder: true,
+                        stateSave: true,
+                        stateSaveCallback: function (settings, data) {
+                            localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+                        },
+                        stateLoadCallback: function (settings) {
+                            return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+                        },
+                        'rowCallback': function (row, data, index) {
+                            //return '<a href=http://systems.domain.local/' + data['Computername'] + '>' + data['Computername'] + '.html </a>';
+
+                            if (id == 'storage') {
+
+                                if ((data[2] < 85)) {
+
+                                    /*      .innerHTML = '<a href=http://systems.domain.local/' + data['Computername'] + '>' + data['Computername'] + '.html </a>'; */
+                                    $(row).find('td:eq(2)').css('background-color', 'green');
+                                    $(row).find('td:eq(2)').css('color', 'white');
+                                    $(row).find('td:eq(2)').addClass('bold');
+                                }
+
+                                if (data[2] > 85) {
+
+                                    $(row).find('td:eq(2)').css('background-color', 'red');
+                                    $(row).find('td:eq(2)').css('color', 'white');
+                                    $(row).find('td:eq(2)').addClass('bold');
+
+                                }
+
+                                if (data[2] == 'Error') {
+
+                                    $(row).find('td:eq(2)').css('background-color', 'red');
+                                    $(row).find('td:eq(2)').css('color', 'white');
+                                    $(row).find('td:eq(2)').addClass('bold');
+
+                                }
+
+                            }
+
+                            if (id !== 'storage') {
+
+                                if (data[rowCallback] == 'true') {
+
+                                    /*      .innerHTML = '<a href=http://systems.domain.local/' + data['Computername'] + '>' + data['Computername'] + '.html </a>'; */
+                                    $(row).find('td:eq(2)').css('background-color', 'green');
+                                    $(row).find('td:eq(2)').css('color', 'white');
+                                    $(row).find('td:eq(2)').addClass('bold');
+
+                                }
+                                if (data[rowCallback] == 'false') {
+
+                                    $(row).find('td:eq(2)').css('background-color', 'red');
+                                    $(row).find('td:eq(2)').css('color', 'white');
+                                    $(row).find('td:eq(2)').addClass('bold');
+
+                                }
+
+                                if (data[rowCallback] == 'EXCLUDED?') {
+
+                                    $(row).find('td:eq(2)').css('background-color', 'yellow');
+                                    $(row).find('td:eq(2)').css('color', 'white');
+                                    $(row).find('td:eq(2)').addClass('bold');
+
+                                }
+
+
+                            }
+
+                        }
+                    });
+                }
+                setTimeout(function () {
+                    $.each($.fn.dataTable.tables(true), function () {
+                        $(this).DataTable().columns.adjust().draw();
+                    });
+                }, 5);
+
+
+                document.getElementById("mainHeader").innerText = innerText
+
+                $('#loading').css('display', 'none');
+            });
+
+
+
+        }
+
+        function isItup() {
+
+            document.getElementById("mainHeader").innerText = "Server Hard Disks"
+
+            if ($.fn.DataTable.isDataTable("#table")) {
+
+                $('#table').DataTable().clear().destroy();
+                $('#table').empty();
+
+            }
+
+            let items = [];
+            let columns = [];
+            $.getJSON("http://systems.domain.local/isitup.json", function (data) {
+				console.log(data)
+                $.each(data, function (key, val) {
+                    items.push({
+                        title: key,
+                        data: key
+                    });
+                });
+
+                Object.keys(data[0]).forEach(key => columns.push({
+
+                    title: key,
+                    data: key
+
+                }));
+
+                //console.log(columns)
+                $('#table').DataTable({
+                    responsive: true,
+                    destroy: true,
+                    data: data,
+                    columns: columns,
+                    paging: false,
+                    searching: true,
+                    order: [[2, 'asc']],
+                    search: {
+                        "smart": true
+                    },
+                    colReorder: true,
+                    dom: 'Bfrtip',
+                    processing: true,
+                    buttons: {
+                        buttons: [{
+                            extend: 'copy',
+                            className: 'copyButton'
+                        },
+                        {
+                            extend: 'csv',
+                            className: 'csv'
+                        },
+
+                        {
+                            extend: 'excel',
+                            className: 'buttons-excel'
+                        },
+                            'colvis',
+                            'searchBuilder'
+
+                        ]
+                    },
+                    colReorder: true,
+                    stateSave: true,
+                    stateSaveCallback: function (settings, data) {
+                        localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+                    },
+                    stateLoadCallback: function (settings) {
+                        return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+                    },
+                    'rowCallback': function (row, data, index) {
+
+                        if (data['Online'] = 'true') {
+                            $(row).find('td:eq(2)').css('background-color', 'green');
+                            $(row).find('td:eq(2)').css('color', 'white');
+                            $(row).find('td:eq(2)').addClass('bold');
+                        }
+                        if (data['Online'] !== 'true') {
+                            $(row).find('td:eq(2)').css('background-color', 'red');
+                            $(row).find('td:eq(2)').css('color', 'white');
+                            $(row).find('td:eq(2)').addClass('bold');
+                        }
+
+                    }
+                });
+
+                setTimeout(function () {
+                    $.each($.fn.dataTable.tables(true), function () {
+                        $(this).DataTable().columns.adjust().draw();
+                    });
+                }, 5);
+            });
+
+        }
+
+        function getUCS() {
+
+            document.getElementById("mainHeader").innerText = "UCS Inventory"
+
+            if ($.fn.DataTable.isDataTable("#table")) {
+
+                $('#table').DataTable().clear().destroy();
+                $('#table').empty();
+
+            }
+
+            let items = [];
+            let columns = [];
+            $.getJSON("http://systems.domain.local/ucs.json", function (data) {
+
+                $.each(data, function (key, val) {
+                    items.push({
+                        title: key,
+                        data: key
+                    });
+                });
+
+                Object.keys(data[0]).forEach(key => columns.push({
+
+                    title: key,
+                    data: key
+
+                }));
+
+                //console.log(columns)
+                $('#table').DataTable({
+                    responsive: true,
+                    destroy: true,
+                    data: data,
+                    columns: columns,
+                    paging: false,
+                    searching: true,
+                    order: [[2, 'asc']],
+                    search: {
+                        "smart": true
+                    },
+                    colReorder: true,
+                    dom: 'Bfrtip',
+                    processing: true,
+                    buttons: {
+                        buttons: [{
+                            extend: 'copy',
+                            className: 'copyButton'
+                        },
+                        {
+                            extend: 'csv',
+                            className: 'csv'
+                        },
+
+                        {
+                            extend: 'excel',
+                            className: 'buttons-excel'
+                        },
+                            'colvis',
+                            'searchBuilder'
+
+                        ]
+                    },
+                    colReorder: true,
+                    stateSave: true,
+                    stateSaveCallback: function (settings, data) {
+                        localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+                    },
+                    stateLoadCallback: function (settings) {
+                        return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+                    }/* ,
+        'rowCallback': function (row, data, index) {
+
+            if (data['Online'] = 'true') {
+                $(row).find('td:eq(2)').css('background-color', 'green');
+                $(row).find('td:eq(2)').css('color', 'white');
+                $(row).find('td:eq(2)').addClass('bold');
+            }
+            if (data['Online'] !== 'true') {
+                $(row).find('td:eq(2)').css('background-color', 'red');
+                $(row).find('td:eq(2)').css('color', 'white');
+                $(row).find('td:eq(2)').addClass('bold');
+            }
+
+        } */
+                });
+
+                setTimeout(function () {
+                    $.each($.fn.dataTable.tables(true), function () {
+                        $(this).DataTable().columns.adjust().draw();
+                    });
+                }, 5);
+            });
+
+        }
+
+        function vmDisks() {
+
+            document.getElementById("mainHeader").innerText = "Server Hard Disks"
+
+            if ($.fn.DataTable.isDataTable("#table")) {
+
+                $('#table').DataTable().clear().destroy();
+                $('#table').empty();
+
+            }
+
+            let items = [];
+            let columns = [];
+            $.getJSON("http://systems.domain.local/AllVMDisks.json", function (data) {
+
+                console.log(data)
+                $.each(data, function (key, val) {
+                    items.push({
+                        title: key,
+                        data: key
+                    });
+                });
+
+                Object.keys(data[0]).forEach(key => columns.push({
+
+                    title: key,
+                    data: key
+
+                }));
+
+                //console.log(columns)
+                $('#table').DataTable({
+                    responsive: true,
+                    destroy: true,
+                    data: data,
+                    columns: columns,
+                    paging: false,
+                    searching: true,
+                    search: {
+                        "smart": true
+                    },
+                    colReorder: true,
+                    dom: 'Bfrtip',
+                    processing: true,
+                    buttons: {
+                        buttons: [{
+                            extend: 'copy',
+                            className: 'copyButton'
+                        },
+                        {
+                            extend: 'csv',
+                            className: 'csv'
+                        },
+
+                        {
+                            extend: 'excel',
+                            className: 'buttons-excel'
+                        },
+                            'colvis',
+                            'searchBuilder'
+
+                        ]
+                    },
+                    colReorder: true,
+                    stateSave: true,
+                    stateSaveCallback: function (settings, data) {
+                        localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+                    },
+                    stateLoadCallback: function (settings) {
+                        return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+                    }
+                });
+            });
+
+
+        }
+
+        function serverDisks() {
+
+            document.getElementById("mainHeader").innerText = "Server Hard Disks"
+
+            if ($.fn.DataTable.isDataTable("#table")) {
+
+                $('#table').DataTable().clear().destroy();
+                $('#table').empty();
+
+            }
+
+            let items = [];
+            let columns = [];
+            $.getJSON("http://systems.domain.local/AllDisks.json", function (data) {
+
+                $.each(data, function (key, val) {
+                    items.push({
+                        title: key,
+                        data: key
+                    });
+                });
+
+                Object.keys(data[0]).forEach(key => columns.push({
+
+                    title: key,
+                    data: key
+
+                }));
+
+                //console.log(columns)
+                $('#table').DataTable({
+                    responsive: true,
+                    destroy: true,
+                    data: data,
+                    columns: columns,
+                    deferrender: true,
+                    paging: true,
+                    searching: true,
+                    search: {
+                        "smart": true
+                    },
+                    colReorder: true,
+                    dom: 'Bfrtip',
+                    processing: true,
+                    buttons: {
+                        buttons: [{
+                            extend: 'copy',
+                            className: 'copyButton'
+                        },
+                        {
+                            extend: 'csv',
+                            className: 'csv'
+                        },
+
+                        {
+                            extend: 'excel',
+                            className: 'buttons-excel'
+                        },
+                            'colvis',
+                            'searchBuilder'
+
+                        ]
+                    },
+                    colReorder: true,
+                    stateSave: true,
+                    stateSaveCallback: function (settings, data) {
+                        localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+                    },
+                    stateLoadCallback: function (settings) {
+                        return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+                    }
+                });
+            });
+
+        }
+
+        function adLockedUsers() {
+
+            document.getElementById("mainHeader").innerText = "AD Lockouts"
+
+            if ($.fn.DataTable.isDataTable("#table")) {
+
+                $('#table').DataTable().clear().destroy();
+                $('#table').empty();
+
+            }
+
+            let items = [];
+            let columns = [];
+            $.getJSON("http://systems.domain.local/AdLockouts.json", function (data) {
+
+                $.each(data, function (key, val) {
+                    items.push({
+                        title: key,
+                        data: key
+                    });
+                });
+
+                Object.keys(data[0]).forEach(key => columns.push({
+
+                    title: key,
+                    data: key
+
+                }));
+
+                //console.log(columns)
+                $('#table').DataTable({
+                    responsive: true,
+                    destroy: true,
+                    data: data,
+                    columns: columns,
+                    paging: false,
+                    searching: true,
+                    search: {
+                        "smart": true
+                    },
+                    colReorder: true,
+                    dom: 'Bfrtip',
+                    processing: true,
+                    buttons: {
+                        buttons: [{
+                            extend: 'copy',
+                            className: 'copyButton'
+                        },
+                        {
+                            extend: 'csv',
+                            className: 'csv'
+                        },
+
+                        {
+                            extend: 'excel',
+                            className: 'buttons-excel'
+                        },
+                            'colvis',
+                            'searchBuilder'
+
+                        ]
+                    },
+                    colReorder: true,
+                    stateSave: true,
+                    stateSaveCallback: function (settings, data) {
+                        localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+                    },
+                    stateLoadCallback: function (settings) {
+                        return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+                    }
+                });
+            });
+
+        }
+
+        function adGroups() {
+
+            document.getElementById("mainHeader").innerText = "AD Group"
+
+            if ($.fn.DataTable.isDataTable("#table")) {
+
+                $('#table').DataTable().clear().destroy();
+                $('#table').empty();
+
+            }
+
+            let items = [];
+            let columns = [];
+            $.getJSON("http://systems.domain.local/AdGroups.json", function (data) {
+
+                $.each(data, function (key, val) {
+                    items.push({
+                        title: key,
+                        data: key
+                    });
+                });
+
+                Object.keys(data[0]).forEach(key => columns.push({
+
+                    title: key,
+                    data: key
+
+                }));
+
+                //console.log(columns)
+                $('#table').DataTable({
+                    responsive: true,
+                    destroy: true,
+                    data: data,
+                    columns: columns,
+                    paging: false,
+                    searching: true,
+                    search: {
+                        "smart": true
+                    },
+                    colReorder: true,
+                    dom: 'Bfrtip',
+                    processing: true,
+                    buttons: {
+                        buttons: [{
+                            extend: 'copy',
+                            className: 'copyButton'
+                        },
+                        {
+                            extend: 'csv',
+                            className: 'csv'
+                        },
+
+                        {
+                            extend: 'excel',
+                            className: 'buttons-excel'
+                        },
+                            'colvis', 'searchBuilder'
+                        ]
+                    },
+                    colReorder: true,
+                    stateSave: true,
+                    stateSaveCallback: function (settings, data) {
+                        localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+                    },
+                    stateLoadCallback: function (settings) {
+                        return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+                    }
+
+                });
+            });
+
+        }
+
+        function adServers() {
+            document.getElementById("mainHeader").innerText = "AD Servers"
+            if ($.fn.DataTable.isDataTable("#table")) {
+
+                $('#table').DataTable().clear().destroy();
+                $('#table').empty();
+
+            }
+
+            let items = [];
+            let columns = [];
+            $.getJSON("http://systems.domain.local/AdAllServers.json", function (data) {
+
+                $.each(data, function (key, val) {
+                    items.push({
+                        title: key,
+                        data: key
+                    });
+                });
+
+                Object.keys(data[0]).forEach(key => columns.push({
+
+                    title: key,
+                    data: key
+
+                }));
+
+                //console.log(columns)
+                $('#table').DataTable({
+                    responsive: true,
+                    destroy: true,
+                    data: data,
+                    columns: columns,
+                    paging: false,
+                    searching: true,
+                    search: {
+                        "smart": true
+                    },
+                    colReorder: true,
+                    dom: 'Bfrtip',
+                    processing: true,
+                    buttons: {
+                        buttons: [{
+                            extend: 'copy',
+                            className: 'copyButton'
+                        },
+                        {
+                            extend: 'csv',
+                            className: 'csv'
+                        },
+
+                        {
+                            extend: 'excel',
+                            className: 'buttons-excel'
+                        },
+                            'colvis', 'searchBuilder'
+                        ]
+                    },
+                    colReorder: true,
+                    stateSave: true,
+                    stateSaveCallback: function (settings, data) {
+                        localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+                    },
+                    stateLoadCallback: function (settings) {
+                        return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+                    }
+
+                });
+            });
+
+        }
+
+        function adDomain() {
+            document.getElementById("mainHeader").innerText = "AD Domain"
+            if ($.fn.DataTable.isDataTable("#table")) {
+
+                $('#table').DataTable().clear().destroy();
+                $('#table').empty();
+
+            }
+
+            let items = [];
+            let columns = [];
+            $.getJSON("http://systems.domain.local/AdDomain.json", function (data) {
+
+                $.each(data, function (key, val) {
+                    items.push({
+                        title: key,
+                        data: key
+                    });
+                });
+
+                Object.keys(data[0]).forEach(key => columns.push({
+
+                    title: key,
+                    data: key
+
+                }));
+
+
+                $('#table').DataTable({
+                    responsive: true,
+                    destroy: true,
+                    data: data,
+                    columns: columns,
+                    paging: false,
+                    searching: true,
+                    search: {
+                        "smart": true
+                    },
+                    colReorder: true,
+                    dom: 'Bfrtip',
+                    processing: true,
+                    buttons: {
+                        buttons: [{
+                            extend: 'copy',
+                            className: 'copyButton'
+                        },
+                        {
+                            extend: 'csv',
+                            className: 'csv'
+                        },
+
+                        {
+                            extend: 'excel',
+                            className: 'buttons-excel'
+                        },
+                            'colvis', 'searchBuilder'
+                        ]
+                    },
+                    colReorder: true,
+                    stateSave: true,
+                    stateSaveCallback: function (settings, data) {
+                        localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+                    },
+                    stateLoadCallback: function (settings) {
+                        return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+                    }
+
+                });
+            });
+
+
+        }
+
+        function adUsers() {
+            document.getElementById("mainHeader").innerText = "AD Users"
+            if ($.fn.DataTable.isDataTable("#table")) {
+
+                $('#table').DataTable().clear().destroy();
+                $('#table').empty();
+
+            }
+
+            let items = [];
+            let columns = [];
+            $.getJSON("http://systems.domain.local/AllADUsers.json", function (data) {
+
+                $.each(data, function (key, val) {
+                    items.push({
+                        title: key,
+                        data: key
+                    });
+                });
+
+                Object.keys(data[0]).forEach(key => columns.push({
+
+                    title: key,
+                    data: key
+
+                }));
+
+                //console.log(columns)
+                $('#table').DataTable({
+                    responsive: true,
+                    destroy: true,
+                    data: data,
+                    columns: columns,
+                    paging: false,
+                    searching: true,
+                    search: {
+                        "smart": true
+                    },
+                    colReorder: true,
+                    dom: 'Bfrtip',
+                    processing: true,
+                    buttons: {
+                        buttons: [{
+                            extend: 'copy',
+                            className: 'copyButton'
+                        },
+                        {
+                            extend: 'csv',
+                            className: 'csv'
+                        },
+
+                        {
+                            extend: 'excel',
+                            className: 'buttons-excel'
+                        },
+                            'colvis', 'searchBuilder'
+                        ]
+                    },
+                    colReorder: true,
+                    stateSave: true,
+                    stateSaveCallback: function (settings, data) {
+                        localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+                    },
+                    stateLoadCallback: function (settings) {
+                        return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+                    }
+
+                });
+            });
+
+
+        }
+
+        function ad90Users() {
+
+            document.getElementById("mainHeader").innerText = "AD Users last logon 90+ days ago"
+
+            if ($.fn.DataTable.isDataTable("#table")) {
+
+                $('#table').DataTable().clear().destroy();
+                $('#table').empty();
+
+            }
+
+
+            let items = [];
+            let columns = [];
+            $.getJSON("http://systems.domain.local/ADUsers90.json", function (data) {
+
+                $.each(data, function (key, val) {
+                    items.push({
+                        title: key,
+                        data: key
+                    });
+                });
+
+                Object.keys(data[0]).forEach(key => columns.push({
+
+                    title: key,
+                    data: key
+
+                }));
+
+                $('#table').DataTable({
+                    responsive: true,
+                    destroy: true,
+                    data: data,
+                    columns: columns,
+                    paging: false,
+                    searching: true,
+                    search: {
+                        "smart": true
+                    },
+                    colReorder: true,
+                    dom: 'Bfrtip',
+                    processing: true,
+                    buttons: {
+                        buttons: [{
+                            extend: 'copy',
+                            className: 'copyButton'
+                        },
+                        {
+                            extend: 'csv',
+                            className: 'csv'
+                        },
+
+                        {
+                            extend: 'excel',
+                            className: 'buttons-excel'
+                        },
+                            'colvis', 'searchBuilder'
+                        ]
+                    },
+                    colReorder: true,
+                    stateSave: true,
+                    stateSaveCallback: function (settings, data) {
+                        localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+                    },
+                    stateLoadCallback: function (settings) {
+                        return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+                    }
+
+                });
+            });
+
+        }
+
+        function vmwareServers() {
+
+            document.getElementById("mainHeader").innerText = "VMware Servers"
+            if ($.fn.DataTable.isDataTable("#table")) {
+
+                $('#table').DataTable().clear().destroy();
+                $('#table').empty();
+
+            }
+
+
+            let items = [];
+            let columns = [];
+            $.getJSON("http://systems.domain.local/AllVMware.json", function (data) {
+
+
+                $.each(data, function (key, val) {
+                    items.push({
+                        title: key,
+                        data: key
+                    });
+                });
+
+                Object.keys(data[0]).forEach(key => columns.push({
+
+                    title: key,
+                    data: key
+
+                }));
+                //console.log(columns)
+                $('#table').DataTable({
+                    responsive: true,
+                    destroy: true,
+                    data: data,
+                    columns: columns,
+                    paging: false,
+                    searching: true,
+                    search: {
+                        "smart": true
+                    },
+                    colReorder: true,
+                    dom: 'Bfrtip',
+                    processing: true,
+                    buttons: {
+                        buttons: [{
+                            extend: 'copy',
+                            className: 'copyButton'
+                        },
+                        {
+                            extend: 'csv',
+                            className: 'csv'
+                        },
+
+                        {
+                            extend: 'excel',
+                            className: 'buttons-excel'
+                        },
+                            'colvis', 'searchBuilder'
+                        ]
+                    },
+                    colReorder: true,
+                    stateSave: true,
+                    stateSaveCallback: function (settings, data) {
+
+                        localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+                    },
+                    stateLoadCallback: function (settings) {
+                        return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+                    }
+                });
+            });
+
+        }
+
+        function openNav() {
+
+            if (document.getElementById("mySidenav").style.width === "250px") {
+                document.getElementById("mySidenav").style.width = "0";
+                document.getElementById("main").style.marginLeft = "0";
+
+            } else {
+                document.getElementById("mySidenav").style.width = "250px";
+                document.getElementById("main").style.marginLeft = "250px";
+
+            }
+        }
+
+        function closeNav() {
+            document.getElementById("mySidenav").style.width = "0";
+            document.getElementById("main").style.marginLeft = "0";
+        }
+
+        function getdate() {
+
+            var today = new Date();
+            var hour = today.getHours();
+
+            hour = (hour < 10 ? "0" : "") + hour;
+
+            var min = today.getMinutes();
+            min = (min < 10 ? "0" : "") + min;
+
+            var sec = today.getSeconds();
+            sec = (sec < 10 ? "0" : "") + sec;
+
+            var year = today.getFullYear();
+
+            var mm = today.getMonth() + 1;
+            mm = (today.getMonth() < 10 ? "0" : "") + mm;
+
+            var daynum = today.getDate();
+            daynum = (daynum < 10 ? "0" : "") + daynum;
+
+            var weekday = new Array(7);
+            weekday[0] = "Sunday";
+            weekday[1] = "Monday";
+            weekday[2] = "Tuesday";
+            weekday[3] = "Wednesday";
+            weekday[4] = "Thursday";
+            weekday[5] = "Friday";
+            weekday[6] = "Saturday";
+
+            var day = weekday[today.getDay()];
+
+            if (sec < 10) {
+                sec = "0" + sec;
+            }
+
+            $("#date").text(day + "," + " " + " " + month + "-" + daynum + "-" + year + "  " + hour + ":" + min + ":" + sec);
+
+            setTimeout(function () {
+                getdate()
+            }, 500);
+        }
+
+        (function () {
+
+            function checkTime(i) {
+                return (i < 10) ? "0" + i : i;
+            }
+
+            var weekday = new Array(7);
+            weekday[0] = "Sunday";
+            weekday[1] = "Monday";
+            weekday[2] = "Tuesday";
+            weekday[3] = "Wednesday";
+            weekday[4] = "Thursday";
+            weekday[5] = "Friday";
+            weekday[6] = "Saturday";
+
+            //   var mm = today.getMonth() + 1;
+            //  mm = (today.getMonth() < 10 ? "0" : "") + mm;
+
+            function startTime() {
+                var today = new Date(),
+                    d = weekday[today.getDay()],
+                    mm = ((checkTime(today.getMonth() + 1)) < 10 ? "0" : "") + (today.getMonth() + 1),
+                    dn = (today.getDate() < 10 ? "0" : "") + today.getDate(),
+                    h = checkTime(today.getHours()),
+                    m = checkTime(today.getMinutes()),
+                    s = checkTime(today.getSeconds()),
+                    y = checkTime(today.getFullYear())
+                document.getElementById('time').innerHTML = d + "," + " " + " " + mm + "-" + dn + "-" + y + "  " + h + ":" + m + ":" + s;
+                t = setTimeout(function () {
+                    startTime()
+                }, 500);
+            }
+            startTime();
+        })();
+
+    </script>
+</body>
+
+</html>
