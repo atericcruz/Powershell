@@ -19,7 +19,7 @@ Finally it links and enables the GPO to the OU selected in step 1
 With great power...
 I said good day - Fez 70s show
 #>
-$OU = "$((Get-ADOrganizationalUnit -Filter * | Out-GridView -PassThru -Title 'Please select the parent OU to apply LAPS to').DistinguishedName)" #"OU=GeosolServers,DC=NonProd,DC=geosolinc,DC=com"
+$OU = "$((Get-ADOrganizationalUnit -Filter * | Out-GridView -PassThru -Title 'Please select the parent OU to apply LAPS to').DistinguishedName)"
 
 $Copy_LAPS_MSI_To_Path = "\\$env:USERDNSDOMAIN\NETLOGON"
 $PolicyDefinitions = "C:\Windows\SYSVOL\sysvol\$env:USERDNSDOMAIN\Policies\PolicyDefinitions\en-US"
