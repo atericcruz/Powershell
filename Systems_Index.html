@@ -271,7 +271,7 @@ console.log(id)
                         "render": function (data, type, row, meta) {
 
                             if (id == 'isitup') {
-                                return '<a href="http://systems.domain.local/' + data + '/index.html' + '" target="_blank">' + data + '</a>';
+                                return '<a href="http://servers.domain.local/' + data + '/index.html' + '" target="_blank">' + data + '</a>';
                             } else {
 
                                 return data
@@ -358,13 +358,13 @@ console.log(id)
                             return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
                         },
                         'rowCallback': function (row, data, index) {
-                            //return '<a href=http://systems.domain.local/' + data['Computername'] + '>' + data['Computername'] + '.html </a>';
+                            //return '<a href=http://servers.domain.local/' + data['Computername'] + '>' + data['Computername'] + '.html </a>';
 
                             if (id == 'storage') {
 
                                 if ((data[2] < 85)) {
 
-                                    /*      .innerHTML = '<a href=http://systems.domain.local/' + data['Computername'] + '>' + data['Computername'] + '.html </a>'; */
+                                    /*      .innerHTML = '<a href=http://servers.domain.local/' + data['Computername'] + '>' + data['Computername'] + '.html </a>'; */
                                     $(row).find('td:eq(2)').css('background-color', 'green');
                                     $(row).find('td:eq(2)').css('color', 'white');
                                     $(row).find('td:eq(2)').addClass('bold');
@@ -392,7 +392,7 @@ console.log(id)
 
                                 if (data[rowCallback] == 'true') {
 
-                                    /*      .innerHTML = '<a href=http://systems.domain.local/' + data['Computername'] + '>' + data['Computername'] + '.html </a>'; */
+                                    /*      .innerHTML = '<a href=http://servers.domain.local/' + data['Computername'] + '>' + data['Computername'] + '.html </a>'; */
                                     $(row).find('td:eq(2)').css('background-color', 'green');
                                     $(row).find('td:eq(2)').css('color', 'white');
                                     $(row).find('td:eq(2)').addClass('bold');
