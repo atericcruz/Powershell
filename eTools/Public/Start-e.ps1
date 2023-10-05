@@ -82,7 +82,7 @@ function Start-e {
 
     $WPFbtnVCred.Add_Click({
 
-            $Script:VCred = Get-Credential -UserName "$env:USERNAME@geosolinc.net" -Message 'Please enter your vCenter credentials'
+            $Script:VCred = Get-Credential -UserName "$env:USERNAME@domain.local" -Message 'Please enter your vCenter credentials'
         
             $WPFddlVcent.Items.Add('D1PVCENTER1')
             $WPFddlVcent.IsEnabled = $True
@@ -104,7 +104,7 @@ function Start-e {
 
             $selected = $WPFddlEsx.SelectedItem
             $Script:TheHost = @($Script:VMHosts | Where-Object { $_.name -like "$selected" })
-            $Global:DaHost = $selected -replace '.geosolinc.net'
+            $Global:DaHost = $selected -replace '.domain.local'
             $HostInfo = $Script:TheHost | Select-Object Name, PowerState, ConnectionState, @{N = 'ESXi Version'; e = { $_.Version } }, @{N = 'Model'; e = { $_.Model } }  
             $WPFdgESX.ItemsSource = @($HostInfo)
             $VMs = @( $Script:TheHost | Get-VM | Sort-Object Name | Select-Object Name, PowerState, Guest, Notes )
@@ -121,7 +121,7 @@ function Start-e {
 
     $WPFbtnUCred.Add_Click({
  
-            $Script:UCSCred = Get-Credential -UserName "ucs-geosolinc.net\$env:USERNAME" -Message 'Please enter your UCS credentials'
+            $Script:UCSCred = Get-Credential -UserName "ucs-domain.local\$env:USERNAME" -Message 'Please enter your UCS credentials'
 
             $WPFddlUcs.Items.Add('TA-UCS')
             $WPFddlUcs.Items.Add('TA-UCS2')
